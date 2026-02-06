@@ -200,7 +200,7 @@ function authenticate(req, res, next) {
   }
 
   try {
-    const [agentId, timestamp, signature] = auth.slice(10).split(':');
+    const [agentId, timestamp, signature] = auth.slice(7).split(':');
     
     // Check timestamp is recent (within 5 minutes)
     const ts = parseInt(timestamp);
@@ -1169,7 +1169,7 @@ wss.on('connection', (ws, req) => {
     return;
   }
 
-  const agentId = auth.slice(10).split(':')[0];
+  const agentId = auth.slice(7).split(':')[0];
   wsConnections.set(agentId, ws);
   updateLastSeen(agentId);
 

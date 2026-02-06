@@ -219,15 +219,45 @@ program
           // Need to solve Moltbook's reverse captcha
           console.log('Solving Moltbook verification...');
           
-          // Parse the math challenge (it's usually multiplication)
+          // Parse the math challenge - Moltbook uses weird formatting
           const challenge = postData.verification.challenge;
-          // Extract numbers from the challenge and multiply them
-          const numbers = challenge.match(/\d+/g);
+          
+          // Word to number mapping
+          const wordNums = {
+            zero: 0, one: 1, two: 2, three: 3, four: 4, five: 5,
+            six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+            eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15,
+            sixteen: 16, seventeen: 17, eighteen: 18, nineteen: 19, twenty: 20,
+            thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90,
+            hundred: 100, thousand: 1000
+          };
+          
+          // Normalize the challenge (remove weird casing/duplicates)
+          const normalized = challenge.toLowerCase().replace(/[^a-z0-9\s\*\+\-\/\.]/g, ' ');
+          
+          // Find all numbers (digits or words)
+          let numbers = [];
+          
+          // First try to find digit numbers
+          const digitMatches = normalized.match(/\d+\.?\d*/g) || [];
+          numbers.push(...digitMatches.map(n => parseFloat(n)));
+          
+          // Then find word numbers
+          for (const [word, num] of Object.entries(wordNums)) {
+            if (normalized.includes(word)) {
+              numbers.push(num);
+            }
+          }
+          
           let answer;
-          if (numbers && numbers.length >= 2) {
-            answer = (parseFloat(numbers[0]) * parseFloat(numbers[1])).toFixed(2);
+          if (numbers.length >= 2) {
+            // Usually multiplication for Moltbook challenges
+            answer = (numbers[0] * numbers[1]).toFixed(2);
+          } else if (numbers.length === 1) {
+            answer = numbers[0].toFixed(2);
           } else {
             console.error('Could not parse Moltbook challenge. Manual verification required.');
+            console.error('Challenge:', challenge);
             process.exit(1);
           }
 

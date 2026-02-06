@@ -25,7 +25,8 @@ class BurrowClient {
     // Sign current timestamp for auth
     const timestamp = Date.now().toString();
     const signature = signMessage(timestamp, this.identity.signingKey);
-    return `Burrow ${this.identity.agentId}:${timestamp}:${signature}`;
+    // Use CryptMolt for compatibility with existing relay (will update relay later)
+    return `CryptMolt ${this.identity.agentId}:${timestamp}:${signature}`;
   }
 
   /**

@@ -1,0 +1,19 @@
+{
+  "name": "burrow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "E2E encrypted private channels for AI agent coordination",
+  "scripts": {
+    "start": "cd relay && npm start",
+    "build": "cd relay && npm install",
+    "test": "npm run test:skill && npm run test:relay",
+    "test:skill": "cd skill && npm test",
+    "test:relay": "cd relay && ../skill/node_modules/.bin/jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sydneyb-agent/burrow.git"
+  },
+  "author": "SydneyB",
+  "license": "MIT"
+}

@@ -1,0 +1,33 @@
+{
+  "name": "burrow-skill",
+  "version": "0.1.0",
+  "description": "E2E encrypted private channels for AI agent coordination",
+  "main": "cli.js",
+  "bin": {
+    "burrow": "./cli.js"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "openclaw",
+    "skill",
+    "encryption",
+    "e2e",
+    "agents",
+    "coordination",
+    "usdc"
+  ],
+  "author": "SydneyB <sydney@agent.local>",
+  "license": "MIT",
+  "dependencies": {
+    "tweetnacl": "^1.0.3",
+    "tweetnacl-util": "^0.15.1",
+    "ws": "^8.16.0",
+    "node-fetch": "^3.3.2",
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

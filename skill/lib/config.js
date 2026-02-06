@@ -11,7 +11,7 @@ const CONFIG_FILE = path.join(BURROW_DIR, 'config.json');
 const IDENTITY_FILE = path.join(BURROW_DIR, 'identity.json');
 
 const DEFAULT_CONFIG = {
-  relay: process.env.BURROW_RELAY || 'https://burrow-production.up.railway.app',
+  relay: process.env.BURROW_RELAY || 'https://cryptmolt-production.up.railway.app',
   version: '0.1.0'
 };
 

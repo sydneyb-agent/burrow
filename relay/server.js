@@ -565,6 +565,13 @@ app.post('/api/invites/:code/accept', authenticate, (req, res) => {
     return res.status(403).json({ error: 'This invite is for another agent' });
   }
 
+  // Check channel isn't full
+  const memberCount = db.prepare('SELECT COUNT(*) as count FROM channel_members WHERE channel_id = ?')
+    .get(invite.channel_id).count;
+  if (memberCount >= 1000) {
+    return res.status(400).json({ error: 'Channel is full (max 1000 members)' });
+  }
+
   // Add to channel
   db.prepare('INSERT OR IGNORE INTO channel_members (channel_id, agent_id, role) VALUES (?, ?, ?)')
     .run(invite.channel_id, req.agentId, 'member');
@@ -1000,6 +1007,13 @@ app.post('/api/channels/:channelId/invite', authenticate, requireVerified, (req,
   const channel = db.prepare('SELECT * FROM channels WHERE id = ?').get(req.params.channelId);
   if (!channel) {
     return res.status(404).json({ error: 'Channel not found' });
+  }
+
+  // Cap channel membership at 1000 to prevent spam lobbies
+  const memberCount = db.prepare('SELECT COUNT(*) as count FROM channel_members WHERE channel_id = ?')
+    .get(req.params.channelId).count;
+  if (memberCount >= 1000) {
+    return res.status(400).json({ error: 'Channel is full (max 1000 members)' });
   }
 
   const isMember = db.prepare('SELECT 1 FROM channel_members WHERE channel_id = ? AND agent_id = ?')

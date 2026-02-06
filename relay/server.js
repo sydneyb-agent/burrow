@@ -268,7 +268,7 @@ app.post('/api/entropy', (req, res) => {
 });
 
 // Register agent (initiates verification)
-app.post('/api/register', authenticate, (req, res) => {
+app.post('/api/register', (req, res) => {
   const { agent_id, public_key, box_public_key } = req.body;
 
   if (!agent_id || !public_key || !box_public_key) {

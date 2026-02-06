@@ -25,6 +25,23 @@ const server = createServer(app);
 const wss = new WebSocketServer({ server, path: '/ws' });
 
 // Health check BEFORE any middleware (Railway needs this)
+// Debug endpoint (temporary)
+app.get('/debug/db', (req, res) => {
+  try {
+    const agents = db.prepare('SELECT agent_id FROM agents').all();
+    const pending = db.prepare('SELECT agent_id, verification_code FROM pending_verifications').all();
+    const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
+    res.json({ 
+      tables: tables.map(t => t.name),
+      agents: agents.map(a => a.agent_id),
+      pending_verifications: pending,
+      db_path: process.env.DATABASE_PATH || './burrow.db'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/health', (req, res) => {
   console.log('Health check hit');
   res.status(200).json({ status: 'ok', version: '0.1.0' });

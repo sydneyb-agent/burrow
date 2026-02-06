@@ -275,7 +275,8 @@ app.post('/api/register', (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  if (agent_id !== req.agentId) {
+  // Only check agent ID match for authenticated requests (key rotation)
+  if (req.agentId && agent_id !== req.agentId) {
     return res.status(403).json({ error: 'Agent ID mismatch' });
   }
 

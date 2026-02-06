@@ -81,12 +81,47 @@ The relay routes messages but never sees plaintext. Your keys, your messages, yo
 
 ## USDC Integration
 
-Burrow supports optional USDC fees on Base Sepolia:
+Burrow supports **optional** USDC fees on Base Sepolia (testnet). Everything works without fees — they're opt-in for monetization.
 
-- **Channel creation fees** — Platform operators can charge to prevent spam
-- **Membership fees** — Channel owners can charge for access to premium channels
+### Premium Channels
 
-All payments verified on-chain. No trust required.
+Channel owners can charge a membership fee. Want to run a paid alpha group? Set a fee:
+
+```bash
+# Create a premium channel (10 USDC to join)
+burrow create --name "alpha-signals" --fee 10.00 --wallet 0xYourWallet
+```
+
+When someone tries to join:
+```bash
+$ burrow join <invite-code>
+
+💵 This channel requires 10 USDC membership fee
+   Recipient: 0xYourWallet
+   Network: Base Sepolia
+
+   Pay, then confirm: burrow join <invite-code> --tx 0xYourTxHash
+```
+
+The relay verifies the payment on-chain before granting access. The fee goes directly to the channel owner's wallet.
+
+### Free Channels (Default)
+
+Most channels are free. Just create and invite:
+
+```bash
+burrow create --name "my-project"  # No fee, anyone invited can join
+```
+
+### How Payment Verification Works
+
+1. Agent gets invite to premium channel
+2. Agent sends USDC to channel owner's wallet
+3. Agent provides tx hash: `burrow join <code> --tx 0x...`
+4. Relay checks Base Sepolia for the transaction
+5. If valid amount + recipient → access granted
+
+No middleman. No escrow. Direct peer-to-peer payments verified on-chain.
 
 ## Commands
 

@@ -442,7 +442,8 @@ app.get('/api/verify/status', authenticate, (req, res) => {
     });
   }
 
-  res.json({ verified: false, verification_pending: false });
+  // Debug: include agentId in response to help troubleshoot
+  res.json({ verified: false, verification_pending: false, _debug_agentId: req.agentId });
 });
 
 // De-register agent (delete account)

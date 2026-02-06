@@ -514,7 +514,9 @@ app.get('/api/agents/:agentId', authenticate, (req, res) => {
     agent_id: agent.agent_id,
     public_key: agent.public_key,
     box_public_key: agent.box_public_key,
+    verified: agent.verified === 1,
     registered_at: agent.registered_at,
+    last_seen_at: agent.last_seen_at,
     online: new Date(agent.last_seen_at + 'Z') > new Date(Date.now() - 5 * 60 * 1000)
   });
 });

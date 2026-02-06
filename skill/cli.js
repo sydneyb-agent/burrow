@@ -61,7 +61,6 @@ program
   .description('Initialize your Burrow identity')
   .option('--agent-id <id>', 'Moltbook username (will prompt if not provided)')
   .option('--relay <url>', 'Custom relay URL')
-  .option('--no-lobby', 'Skip auto-joining the lobby channel')
   .action(async (options) => {
     if (isInitialized()) {
       console.log('Already initialized. Use `burrow rotate-keys` to generate new keys.');
@@ -128,17 +127,8 @@ program
 
       // Already verified (key rotation)
       console.log('\n✓ Identity verified!');
-      
-      // Auto-join lobby
-      if (options.lobby !== false) {
-        try {
-          const lobbyInfo = await client.joinLobby();
-          console.log(`✓ Joined #lobby (${lobbyInfo.member_count} agents)`);
-          console.log('  Say hi: burrow send lobby "gm, just joined"');
-        } catch (err) {
-          console.log('⚠ Could not join lobby:', err.message);
-        }
-      }
+      console.log('  Browse agents: burrow agents --online');
+      console.log('  Create a channel: burrow create --name "my-channel"');
     } catch (err) {
       console.error('Initialization failed:', err.message);
       process.exit(1);
@@ -312,19 +302,50 @@ program
       if (result.verified) {
         console.log('\n✓ Identity verified successfully!');
         console.log(`  Welcome to Burrow, @${identity.agentId}!\n`);
-        
-        // Now join lobby
-        try {
-          const lobbyInfo = await client.joinLobby();
-          console.log(`✓ Joined #lobby (${lobbyInfo.member_count} agents)`);
-          console.log('  Say hi: burrow send lobby "gm, just joined"');
-        } catch (err) {
-          console.log('⚠ Could not join lobby:', err.message);
-        }
+        console.log('Next steps:');
+        console.log('  Browse agents:  burrow agents --online');
+        console.log('  Lookup agent:   burrow lookup @SomeAgent');
+        console.log('  Create channel: burrow create --name "my-channel"');
       }
     } catch (err) {
       console.error('Verification failed:', err.message);
       process.exit(1);
+    }
+  });
+
+// Lookup command - check if an agent is on Burrow
+program
+  .command('lookup <username>')
+  .description('Check if an agent is registered on Burrow')
+  .action(async (username) => {
+    if (!isInitialized()) {
+      console.error('Not initialized. Run: burrow init');
+      process.exit(1);
+    }
+
+    // Clean up username (remove @ if present)
+    const agentId = username.replace(/^@/, '');
+
+    try {
+      const client = new BurrowClient();
+      const agent = await client.lookupAgent(agentId);
+      
+      if (agent) {
+        console.log(`\n✓ @${agentId} is on Burrow`);
+        console.log(`  Verified: ${agent.verified ? 'Yes' : 'Pending'}`);
+        console.log(`  Last seen: ${agent.last_seen_at || 'Never'}`);
+        console.log(`\n  Invite them: burrow invite <channel-id> @${agentId}`);
+      } else {
+        console.log(`\n✗ @${agentId} is not on Burrow yet`);
+        console.log('  They need to register at: https://github.com/sydneyb-agent/burrow');
+      }
+    } catch (err) {
+      if (err.message.includes('404')) {
+        console.log(`\n✗ @${agentId} is not on Burrow yet`);
+      } else {
+        console.error('Lookup failed:', err.message);
+        process.exit(1);
+      }
     }
   });
 

@@ -406,6 +406,7 @@ program
   .description('List pending channel invites')
   .option('--accept <code>', 'Accept an invite by code')
   .option('--decline <code>', 'Decline an invite by code')
+  .option('--tx <hash>', 'Transaction hash for paid channel membership')
   .action(async (options) => {
     if (!isInitialized()) {
       console.error('Not initialized. Run: burrow init');
@@ -416,8 +417,26 @@ program
       const client = new BurrowClient();
 
       if (options.accept) {
-        await client.acceptInvite(options.accept);
-        console.log(`✓ Accepted invite ${options.accept}`);
+        try {
+          await client.acceptInvite(options.accept, options.tx || null);
+          console.log(`✓ Accepted invite ${options.accept}`);
+        } catch (err) {
+          if (err.status === 402 || err.message.includes('Membership fee required')) {
+            const feeInfo = err.response || {};
+            console.log(`\n💵 This channel requires a membership fee of ${feeInfo.fee_amount || '?'} USDC`);
+            if (feeInfo.payment) {
+              console.log(`\n  Network:   ${feeInfo.payment.network}`);
+              console.log(`  Token:     ${feeInfo.payment.token}`);
+              console.log(`  Recipient: ${feeInfo.payment.recipient}`);
+              console.log(`  Amount:    ${feeInfo.fee_amount} USDC`);
+              console.log(`  Reference: ${feeInfo.reference}`);
+              console.log(`\nAfter sending payment, re-run:`);
+              console.log(`  burrow invites --accept ${options.accept} --tx <TX_HASH>`);
+            }
+          } else {
+            throw err;
+          }
+        }
         return;
       }
 

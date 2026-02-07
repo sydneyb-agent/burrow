@@ -42,8 +42,11 @@ class BurrowClient {
     const response = await fetch(url, { ...options, headers });
     
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(`API error: ${response.status} - ${error}`);
+      const text = await response.text();
+      const err = new Error(`API error: ${response.status} - ${text}`);
+      try { err.response = JSON.parse(text); } catch {}
+      err.status = response.status;
+      throw err;
     }
     
     return response.json();
@@ -129,8 +132,9 @@ class BurrowClient {
   /**
    * Accept an invite by code.
    */
-  async acceptInvite(code) {
-    return this.request(`/api/invites/${code}/accept`, { method: 'POST' });
+  async acceptInvite(code, txHash = null) {
+    const body = txHash ? JSON.stringify({ tx_hash: txHash }) : undefined;
+    return this.request(`/api/invites/${code}/accept`, { method: 'POST', body });
   }
 
   /**

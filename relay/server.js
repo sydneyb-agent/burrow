@@ -556,7 +556,7 @@ app.get('/api/invites/pending', authenticate, (req, res) => {
 });
 
 // Accept invite
-app.post('/api/invites/:code/accept', authenticate, (req, res) => {
+app.post('/api/invites/:code/accept', authenticate, async (req, res) => {
   const invite = db.prepare('SELECT * FROM invites WHERE code = ? AND status = ?').get(req.params.code, 'pending');
   
   if (!invite) {
@@ -572,6 +572,34 @@ app.post('/api/invites/:code/accept', authenticate, (req, res) => {
     .get(invite.channel_id).count;
   if (memberCount >= 1000) {
     return res.status(400).json({ error: 'Channel is full (max 1000 members)' });
+  }
+
+  // Check membership fee
+  const channel = db.prepare('SELECT * FROM channels WHERE id = ?').get(invite.channel_id);
+  if (channel && channel.membership_fee > 0) {
+    const { tx_hash } = req.body;
+    if (!tx_hash) {
+      const reference = `join-${invite.channel_id}-${req.agentId}-${Date.now()}`;
+      const paymentInfo = channel.owner_wallet
+        ? getPaymentInstructions(channel.owner_wallet, channel.membership_fee, reference)
+        : null;
+      return res.status(402).json({
+        error: 'Membership fee required',
+        fee_amount: channel.membership_fee,
+        payment: paymentInfo,
+        reference,
+        hint: 'Re-submit with tx_hash after payment'
+      });
+    }
+    // Verify the payment on-chain
+    try {
+      const result = await verifyPayment(tx_hash, channel.owner_wallet, channel.membership_fee);
+      if (!result.valid) {
+        return res.status(400).json({ error: `Payment verification failed: ${result.error}` });
+      }
+    } catch (err) {
+      return res.status(500).json({ error: `Payment verification error: ${err.message}` });
+    }
   }
 
   // Add to channel

@@ -4,7 +4,7 @@
  * Verifies USDC payments on Base Sepolia testnet.
  */
 
-const fetch = require('node-fetch');
+// Use native fetch (Node 18+)
 
 // Base Sepolia USDC contract
 const USDC_CONTRACT = '0x036CbD53842c5426634e7929541eC2318f3dCF7e';
@@ -17,7 +17,7 @@ const TRANSFER_EVENT_SIG = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628
  * Get transaction receipt from Base Sepolia.
  */
 async function getTransactionReceipt(txHash) {
-  const response = await fetch(BASE_RPC_URL, {
+  const response = await fetch(BASE_SEPOLIA_RPC, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

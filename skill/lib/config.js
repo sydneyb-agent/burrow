@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const BURROW_DIR = path.join(os.homedir(), '.burrow');
+const BURROW_DIR = process.env.BURROW_DIR || path.join(os.homedir(), '.burrow');
 const CONFIG_FILE = path.join(BURROW_DIR, 'config.json');
 const IDENTITY_FILE = path.join(BURROW_DIR, 'identity.json');
 

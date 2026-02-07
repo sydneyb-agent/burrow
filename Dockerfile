@@ -6,7 +6,7 @@ RUN apk add --no-cache python3 make g++ sqlite
 WORKDIR /app
 
 # Copy root package.json for the start script
-COPY package.json package-lock.json ./
+COPY package.json ./
 
 # Copy relay and install dependencies
 COPY relay/ relay/
